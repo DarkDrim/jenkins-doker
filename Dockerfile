@@ -1,14 +1,16 @@
-FROM ubuntu
+FROM alpine:3.16
 
- ENV TZ=Europe/Kiev
- 
- COPY src/index.php /var/www/html
+# Setup apache and php
+RUN apk --no-cache --update \
+    add apache2 \
+    php8-apache2 \
+    php8-phar \
+    tzdata \
+    && rm /var/www/localhost/htdocs/index.html
 
- RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
- RUN    apt update
- RUN    apt install -y apache2 php
- RUN    rm -rf /var/www/html/index.html
-     
- EXPOSE 80
+COPY src/index.php /var/www/localhost/htdocs
 
- CMD ["apachectl", "-D", "FOREGROUND"]
+ENV TZ=Europe/Kiev
+EXPOSE 80
+
+CMD ["httpd", "-D", "FOREGROUND"]
